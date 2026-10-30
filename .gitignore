@@ -44,3 +44,12 @@ Thumbs.db
 credentials.json
 token.json
 data/logs/
+
+# Never commit prospect data, spreadsheets or databases (they hold contact data)
+*.xlsx
+*.xls
+*.csv
+*.sqlite
+*.sqlite3
+*.db
+.schema*
