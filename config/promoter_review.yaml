@@ -1,0 +1,40 @@
+# Manual review of Ticketmaster promoter-of-record names (2026-10-25).
+# exclude: never a target, with the reason. merge: listing variants of one company.
+exclude:
+  "cuffe and taylor": Live Nation-owned (client excludes Live Nation brands)
+  "academy events": Academy Music Group, Live Nation-owned
+  "mondial price": ticket-price code, not a promoter
+  "scottish event campus": venue (SEC / OVO Hydro)
+  "vega musikkens hus": venue
+  "knitting factory": venue programme
+  "limelight belfast": venue
+  "auckland live": municipal venue operator
+  "stockholm live": arena operator
+  "roisin dubh": venue
+  "swg3": venue
+  "klub stodola": venue
+  "seclusion properties": property company
+  "oasis": the band (tour), not a promoter
+  "the bootleg beatles": tribute band, not a promoter
+  "esk film services": not a music promoter
+  "hockeypark betriebs": venue operator
+  "studio 100": children's entertainment producer
+  "grand opera productions": opera producer, not concerts
+  "stiftelsen oslo domkor": cathedral choir
+  "instytucja kultury": public cultural institution
+  "academica": university body
+  "stowarzyszenie studentow": student association
+  "iheart radio": media company
+  "tm test events": Ticketmaster test account
+  "formula 1": motorsport event
+  "the guildhall trust": venue trust
+  "the academy": venue
+  "fiery angel": theatre producer
+  "international talent booking": booking agency (booking-only)
+  "the harbour agency": booking agency (booking-only)
+  "soerjadi holdings": holding company, operator unclear
+merge:
+  "s j m": SJM Concerts
+  "sjm new": SJM Concerts
+  "kilimanjaro live": Kilimanjaro Live
+  "kilimanjaro": Kilimanjaro Live

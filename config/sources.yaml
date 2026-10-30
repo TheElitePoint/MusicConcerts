@@ -1,0 +1,97 @@
+# ============================================================================
+# SOURCE REGISTRY - enable/disable and ordering per pipeline stage.
+# Order == fallback order. The pipeline walks the list and stops when the
+# fact is resolved. Free sources always precede metered ones.
+# ============================================================================
+
+discovery:                      # S1 - SS3 activity-first, SS12-SS21
+  # `enabled` must list ONLY implemented adapters. Listing a source that has no
+  # adapter makes the config silently inert, which is worse than disabling it.
+  order: [musicbrainz, itunes, spotify, discogs, deezer, bandcamp]
+  enabled: [musicbrainz, itunes, spotify]
+  # Not yet implemented (adapter required before enabling):
+  #   deezer   - album.label lookup; enrichment only (feed endpoints are dead)
+  #   bandcamp - label /music pages; independent-label discovery (SS19)
+  planned: [deezer, bandcamp]
+  lookback_days: 120            # "recent" release window for activity signals
+  mb_pages: 15                  # MusicBrainz pagination depth (100 releases per page)
+  max_labels_per_source: 600
+
+resolution:                     # S2 - raw label string -> canonical company + domain
+  order: [musicbrainz, wikidata, discogs, websearch, tavily]
+  enabled: [musicbrainz, wikidata, discogs, websearch, tavily]
+
+verification:                   # S3 - SS24 company website is the strongest source
+  order: [website, wikidata, musicbrainz, discogs, websearch, tavily]
+  enabled: [website, wikidata, musicbrainz, discogs, websearch, tavily]
+  website:
+    max_pages_per_site: 12
+    page_hints: [about, artists, roster, talent, team, clients, our-artists,
+                 releases, catalogue, catalog, management, services,
+                 distribution, contact, news, careers, jobs]
+    respect_robots: true
+    timeout_seconds: 20
+
+people:                         # S5 - SS30/SS32, free first, Apify last
+  order: [website_team, website_about, websearch, company_instagram, apify_linkedin]
+  enabled: [website_team, website_about, websearch, company_instagram, apify_linkedin]
+  # Apify is only reached when free sources yield fewer than this many candidates
+  apify_min_free_candidates: 2
+  # Name-based paid people search (thirdwatch etc.). Off while credit goes to
+  # company-page harvesting (scripts/harvest_company_people.py), which returns
+  # only people LinkedIn links to the company page. Re-enable for companies with
+  # no LinkedIn page once that pass is done (2026-10-19).
+  paid_name_search: true
+  # Imprints of the three majors (SS9 excluded core brands) that slipped past the
+  # company gates. Never spend people-search credit on them.
+  skip_major_imprints: [decca, geffen, interscope, capitol, columbia, atlantic, elektra,
+                        island, def jam, republic, rca, epic, warner, parlophone, polydor,
+                        virgin, emi, motown, verve, mercury, reprise, legacy, fontana,
+                        arista, sony, universal, ariola, astralwerks, nonesuch, rhino]
+  # SS51: "The correct number depends on the company." A ceiling per roster band --
+  # never a target. Weak people are still never added just to reach the cap, and a
+  # company that yields fewer genuinely qualifying people simply yields fewer.
+  people_per_company_by_roster:
+    - {max_roster: 9,    cap: 8}     # small label: founder + function leads
+    - {max_roster: 20,   cap: 12}
+    - {max_roster: 30,   cap: 15}
+    - {max_roster: null, cap: 18}    # largest rosters
+  max_people_per_company: 18    # absolute ceiling
+
+profiles:                       # S6 - the only stage that spends Apify budget
+  order: [cached, website_links, websearch, apify]
+  enabled: [cached, website_links, websearch, apify]
+  # Channels allowed to spend Apify credit on profile verification. Instagram is
+  # off while the campaign is LinkedIn-only (2026-10-19): it was ~100 paid lookups
+  # per sweep that could never produce a LinkedIn row.
+  # Channels looked up at all (free or paid). LinkedIn-only campaign (2026-10-19).
+  channels: [linkedin]
+  paid_channels: [linkedin]
+  # Apify is spent ONLY on finding people at companies (S5), per the client
+  # (2026-10-19). One-by-one profile lookups (S6) and profile re-verification
+  # batches are off; people found free stay as candidates until a free route
+  # resolves them.
+  paid_profile_lookup: false
+  paid_profile_verification: false
+
+# ---- Free web search backends (SS11 substitute - Google has no free API) ----
+websearch:
+  backends: [duckduckgo, searxng]
+  duckduckgo:
+    endpoint: "https://html.duckduckgo.com/html/"
+    rate_limit_rps: 0.2
+  searxng:
+    # Public instances rotate; failures fall through to the next one silently.
+    instances:
+      - "https://searx.be/search"
+      - "https://search.bus-hit.me/search"
+      - "https://priv.au/search"
+    rate_limit_rps: 0.2
+  # Tavily sits BESIDE these, not in front of them. Unresolved items only.
+  tavily_role: opportunistic_secondary
+
+# ---- Google Sheet appends (scripts/sync_linkedin_cycle_to_sheet.py) ----------
+sheet:
+  # PLATFORM = labels / management / distributors; LIVE = Promoter / Live (6+ Events).
+  # 2026-10-25 run: promoters only (client instruction).
+  lanes: [LIVE]

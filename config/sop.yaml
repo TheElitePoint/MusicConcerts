@@ -1,0 +1,318 @@
+# ============================================================================
+# THE SOP AS DATA
+# Source: "Music Industry Prospect Research SOP.pdf" (58pp, 68 sections)
+# Every list below is a direct transcription. Section refs are in comments.
+# Changing research policy means editing THIS FILE, not Python.
+# ============================================================================
+sop_version: "1.0"
+
+# --- SS7 Approved Geography -------------------------------------------------
+# "Do not interpret geography based on assumptions."
+geography:
+  approved:
+    north_america:      {"US": United States, "CA": Canada, "MX": Mexico}
+    europe:
+      "GB": United Kingdom
+      "IE": Ireland
+      "ES": Spain
+      "PT": Portugal
+      "FR": France
+      "DE": Germany
+      "NL": Netherlands
+      "BE": Belgium
+      "LU": Luxembourg
+      "CH": Switzerland
+      "AT": Austria
+      "IT": Italy
+      "SE": Sweden
+      "NO": Norway
+      "DK": Denmark
+      "FI": Finland
+      "IS": Iceland
+      "PL": Poland
+      "CZ": Czechia
+      "EE": Estonia
+      "SI": Slovenia
+      "HR": Croatia
+      "GR": Greece
+    anz:                {"AU": Australia, "NZ": New Zealand}
+    apac_selected:      {"SG": Singapore, "JP": Japan, "KR": South Korea}
+    americas_selected:  {"BR": Brazil, "CL": Chile}
+  # Explicit non-approved guidance (SS7 Geography Rule)
+  excluded_notes:
+    - "Do not include companies from Africa."
+    - "Do not broadly include South Asia, Southeast Asia, or other Asian markets outside the approved list."
+  # A company must be HQ'd in, or have clear primary business presence in, an approved country.
+  require_agreeing_signals: 2   # SS7: never infer geography from a single weak signal (e.g. ccTLD alone)
+
+# --- SS4 Approved Company Types --------------------------------------------
+company_types:
+  record_label:
+    label: "Independent Record Label"
+    aliases: [independent record label, small record label, mid-sized record label,
+              boutique label, specialist label, record label, label, imprint, recordings]
+    note: "Must genuinely represent, release, develop, market or manage music from MULTIPLE artists."
+  artist_management:
+    label: "Artist Management Company"
+    aliases: [artist management, music management, management company, boutique management,
+              multi-artist management, artist managers, talent management]
+    note: "Do NOT confuse an individual manager representing one artist with a genuine multi-artist firm."
+  music_distributor:
+    label: "Music Distributor"
+    aliases: [music distribution, independent distributor, boutique distributor,
+              digital distribution, label services distribution, distributor]
+    note: "Must be directly involved in MUSIC distribution. Generic logistics/tech using the word 'distribution' does not qualify."
+  label_services:
+    label: "Label Services / Artist Services"
+    aliases: [label services, artist services, artist development services,
+              release services, campaign services]
+    note: "Qualifies only when working with multiple artists/labels, with a genuine roster or client base,
+           and NOT primarily a competing music-marketing agency."
+  concert_festival:
+    label: "Concert / Festival Business"
+    aliases: [festival, concert promoter, live music promoter, touring company]
+    conditional: true   # SS4.5 - not a default target type
+    note: "Not automatically rejected, but NOT a default company type. Only when operating at a
+           professional music-industry level with recognized artists. Private-event businesses excluded."
+
+# --- SS8 Hard Company Exclusions -------------------------------------------
+# Rejected BEFORE detailed person research. A numeric score can never override these (SS46).
+hard_exclusions:
+  studios_production:          # SS8.1
+    keywords: [recording studio, mixing studio, mastering studio, rehearsal studio,
+               audiovisual production, video production, content production studio,
+               post production, tracking room, mastering engineer, studio hire]
+    reason: "Studio / production business (SS8.1). Musicians using its services does not make it relevant."
+  music_education:             # SS8.2
+    keywords: [music school, music academy, conservatory, training institute, music course,
+               music lessons, private teaching, music education, masterclass programme]
+    reason: "Music education business (SS8.2)."
+  ticketing:                   # SS8.3
+    keywords: [ticketing, ticket marketplace, box office platform, sell tickets]
+    named: [Ticketmaster, DICE, Eventbrite, See Tickets, AXS, Skiddle]
+    reason: "Ticketing business (SS8.3). Useful as a research source, not a target."
+  private_corporate_events:    # SS8.4
+    keywords: [wedding, birthday party, private party, corporate event, corporate entertainment,
+               private celebration, event planning, function band, party band]
+    reason: "Private / corporate event business (SS8.4)."
+  media:                       # SS8.5
+    keywords: [online magazine, music magazine, blog, radio station, television network,
+               media publisher, podcast, news publication, editorial team, journalism]
+    reason: "Media company (SS8.5). Writing about artists is not managing or developing them."
+  streaming_services:          # SS8.6
+    keywords: [streaming service, streaming platform, music streaming app]
+    named: [Spotify, Apple Music, Deezer, Tidal, Amazon Music, YouTube Music, Pandora,
+            SoundCloud, SoundCloud Go, Audiomack, Napster, Qobuz, Bandcamp, Beatport,
+            Epidemic Sound, Artlist, Soundstripe]
+    reason: "Streaming service (SS8.6). Research source, not a target."
+  creative_media_agencies:     # SS8.7
+    keywords: [creative agency, branding agency, advertising agency, media buying,
+               social agency, digital agency, brand studio]
+    reason: "Creative / media agency (SS8.7)."
+  music_marketing_competitors: # SS8.8 - THE most important exclusion (we are the competitor)
+    keywords: [playlist promotion, playlist pitching, music marketing agency, artist marketing services,
+               streaming growth, spotify promotion, influencer promotion for artists,
+               social media promotion for musicians, music release marketing, buy streams,
+               music advertising agency, artist digital marketing]
+    reason: "Competing music-marketing business (SS8.8). PRIMARY BUSINESS MODEL is what matters -
+             a management company with an in-house marketing employee is NOT a competitor."
+  unrelated_entertainment:     # SS8.9
+    keywords: [television production, cinema, film studio, theatre company, sports agency,
+               gaming studio, esports, comedy club]
+    reason: "Unrelated entertainment (SS8.9)."
+  unrelated_industries:        # SS8.10
+    keywords: [software company, saas platform, fintech, bank, accounting firm, law firm,
+               legal services, management consulting, manufacturing, recruitment agency,
+               real estate, insurance]
+    reason: "Unrelated industry (SS8.10). No meaningful direct connection to the music industry."
+
+# --- SS9 Existing Relationship Exclusion List -------------------------------
+existing_relationships:
+  core_brands: [Universal, Sony, Warner, BMG, Altafonte, ONErpm, Believe,
+                The Orchard, Dromedario Records, Cultura Rock, Deep Delay]
+  # Direct geographic/regional variations of a core brand are ALSO excluded (SS63).
+  # e.g. "Sony Music Mexico", "Universal Music UK", "Warner Music France"
+  regional_variation_pattern: true
+  # SS9 / SS64 CARVE-OUT: a separately named company is NOT auto-excluded merely for being
+  # owned by / affiliated with a core brand. It must be researched independently when it has:
+  separately_named_affiliate_criteria:
+    - different commercial name
+    - own identity
+    - own team
+    - own artists or roster
+  carve_out_note: "The exclusion applies to the listed core brand and its DIRECT regional brand
+                   variations, not every separately named business inside the same corporate group."
+
+# --- SS5 Roster Size Guidance ----------------------------------------------
+# "Roster size is an important indicator, but it must NOT be treated as an inflexible rule."
+roster:
+  strongest_range: {min: 3, max: 20}
+  note: "Do not reject a strong company simply because the estimate is slightly above 20.
+         Do not treat a company managing hundreds of artists as equivalent to a focused 10-artist company."
+  # SS6 evidence order for determining roster size
+  evidence_order: [official_website, company_instagram, spotify, youtube, discogs_musicbrainz, google]
+  website_page_hints: [artists, roster, talent, management, our-artists, releases, catalogue, team, clients]
+  # SS6 Roster Estimate Rules
+  reporting:
+    exact:   "{n} artists"                 # when an exact roster is countable
+    range:   "Approximately {lo}-{hi} artists"  # when only a reliable range is establishable
+    unknown: "REVIEW - roster unclear"     # when roster cannot be verified
+  never_guess: "Never guess roster size based on follower count or company size. Never invent an exact number."
+
+# --- SS30 Decision-Maker Role Families -------------------------------------
+# "Do not search only for founders." Focus on actual function, not exact wording (SS30 Equivalent Titles).
+role_families:
+  leadership:                  # SS30.1
+    titles: [Founder, Co-Founder, CEO, President, Owner, Managing Director,
+             Managing Partner, General Manager]
+    seniority: executive
+    relevance: 10
+  digital_marketing:           # SS30.2
+    titles: [Head of Digital, Director of Digital, VP of Digital, Head of Marketing,
+             Marketing Director, VP of Marketing, Head of Artist Marketing,
+             Artist Marketing Director, Head of Audience Development,
+             Audience Development Director]
+    seniority: senior
+    relevance: 10
+    note: "A Digital Marketing Manager MAY qualify in a smaller organization when the role is
+           sufficiently senior and clearly covers multiple artists."
+  label_release:               # SS30.3
+    titles: [Head of Label Operations, Label Operations Director, Label Manager,
+             Senior Label Manager, Head of Campaigns, Campaign Director,
+             Head of Release Management, Release Director]
+    seniority: senior
+    relevance: 10
+  anr_artist_development:      # SS30.4
+    titles: [Head of A&R, Director of A&R, VP of A&R, Head of Artist Development,
+             Artist Development Director]
+    seniority: senior
+    relevance: 10
+    note: "Relevant where responsibility clearly includes artist development, roster strategy,
+           releases, or cross-functional artist growth."
+  artist_management:           # SS30.5
+    titles: [Head of Artist Management, Director of Artist Management,
+             Senior Artist Manager, Artist Manager]
+    seniority: mid_senior
+    relevance: 8
+    note: "An Artist Manager should only qualify when sufficiently senior and relevant to wider company activity."
+  artist_label_services:       # SS30.6
+    titles: [Head of Artist Services, Director of Artist Services, Head of Label Services,
+             Director of Label Services, Artist Services Manager, Label Services Manager,
+             Head of Partnerships, Partnerships Director, Commercial Director]
+    seniority: senior
+    relevance: 9
+  operations:                  # SS30.7
+    titles: [COO, Head of Operations, Operations Director]
+    seniority: senior
+    relevance: 8
+
+# Seniority tiers -> SS42 C2 points (max 8)
+seniority_tiers:
+  executive:   {points: 8, desc: "Clearly senior, can influence company-wide decisions"}
+  senior:      {points: 7, desc: "Clearly senior function head"}
+  mid_senior:  {points: 6, desc: "Strong mid-senior role"}
+  limited:     {points: 4, desc: "Some influence but limited"}
+  junior:      {points: 1, desc: "Junior or weak authority"}
+
+# --- SS31 Person-Level Exclusions ------------------------------------------
+# "Do not include a weak person simply because the company is strong."
+person_exclusions:
+  titles: [intern, assistant, executive assistant, administrative, admin,
+           junior coordinator, a&r assistant, a&r coordinator, junior a&r,
+           marketing assistant, social media coordinator, junior content,
+           graphic designer, photographer, videographer, producer, audio engineer,
+           mixing engineer, mastering engineer, studio manager,
+           finance, accountant, accounting, controller, bookkeeper,
+           hr, human resources, recruiter, legal counsel, lawyer, paralegal,
+           customer support, customer service, receptionist]
+  note: "Matched against the title, case-insensitively, as whole-word/phrase.
+         'Producer' excludes an audio producer, NOT a 'Executive Producer' style leadership title -
+         leadership family match wins over exclusion when both hit."
+
+# --- SS27 Activity & Intent Signal Categories ------------------------------
+# SS41 B2 scores the number of DISTINCT categories present, not raw signal count.
+activity_signal_categories:
+  release_activity:       "Recent single / EP / album, upcoming release, several recent releases, increased frequency"
+  multi_artist_activity:  "Several artists active simultaneously - ESPECIALLY STRONG"
+  new_signing:            "Company announces a new artist / expands roster"
+  roster_expansion:       "Growing roster indicating increasing complexity"
+  social_momentum:        "TikTok growth, Instagram engagement growth, repeated viral content"
+  streaming_momentum:     "Spotify / playlist / Shazam / YouTube growth"
+  active_advertising:     "Paid campaigns around artists or releases (Meta Ad Library)"
+  new_distribution:       "New distribution relationship or label-services arrangement"
+  new_partnership:        "Relevant new music-business partnership"
+  hiring:                 "Hiring around digital, marketing, artist marketing, audience development,
+                           label operations, artist services, campaign management. Supporting evidence, NOT mandatory."
+  market_expansion:       "New country, expanded artist coverage, new business division"
+
+# --- SS38 Evidence Hierarchy -----------------------------------------------
+# "A final record should not depend only on weak evidence."
+evidence_strength:
+  strongest:
+    weight: 3
+    sources: [official company website, official company social profile, official artist website,
+              official team page, verified current linkedin profile, official release information]
+  strong:
+    weight: 2
+    sources: [credible music-industry database, reliable press release, artist linktree,
+              discogs, musicbrainz, recognized industry directory]
+  weak:
+    weight: 1
+    sources: [random directory page, scraped snippet, unverified social account,
+              old article, generic search result without confirmation]
+
+# --- SS35 Instagram Identity Verification Signals --------------------------
+# "Do not qualify a profile solely because the username resembles the person's name."
+instagram_identity_signals:
+  company_in_bio:            3
+  role_in_bio:               2
+  company_tagged:            2
+  company_related_posts:     2
+  roster_artists_appear:     2
+  company_account_follows:   3
+  matches_linkedin_identity: 3
+  external_links_confirm:    3
+  username_resembles_name:   0   # explicitly worth ZERO on its own (SS35)
+  min_score_to_verify:       5   # requires at least two independent real signals
+
+# --- SS47 / SS48 Final Sheet Columns (exact order) -------------------------
+sheets:
+  linkedin:
+    columns: ["Company Name", "Company Website", "Company LinkedIn URL", "Company Instagram URL",
+              "Company Type", "Country", "Estimated Artist Roster", "Roster Evidence URL",
+              "Recent Activity / Intent Signal", "Activity Evidence URL", "Why Company Fits",
+              "Person Name", "Current Job Title", "Person LinkedIn URL", "Person Instagram URL",
+              "Why This Person Fits", "Qualification Score", "Verification Status"]
+    mandatory: ["Company Name", "Company Website", "Company Type", "Country",
+                "Estimated Artist Roster", "Roster Evidence URL", "Recent Activity / Intent Signal",
+                "Activity Evidence URL", "Why Company Fits", "Person Name", "Current Job Title",
+                "Person LinkedIn URL", "Why This Person Fits", "Qualification Score",
+                "Verification Status"]
+  instagram:
+    columns: ["Company Name", "Company Website", "Company Instagram URL", "Company LinkedIn URL",
+              "Company Type", "Country", "Estimated Artist Roster", "Roster Evidence URL",
+              "Recent Activity / Intent Signal", "Activity Evidence URL", "Why Company Fits",
+              "Person Name", "Current Job Title", "Person Instagram URL", "Person LinkedIn URL",
+              "Instagram Profile Status", "Why This Person Fits", "Qualification Score",
+              "Verification Status"]
+    mandatory: ["Company Name", "Company Website", "Company Type", "Country",
+                "Estimated Artist Roster", "Roster Evidence URL", "Recent Activity / Intent Signal",
+                "Activity Evidence URL", "Why Company Fits", "Person Name", "Current Job Title",
+                "Person Instagram URL", "Why This Person Fits", "Qualification Score",
+                "Verification Status"]
+  # SS53: never fabricate. Optional-but-absent URLs are written as this literal.
+  not_found_literal: "Not Found"
+
+# --- SS11 / SS33 / SS35 Search Query Templates -----------------------------
+search_templates:
+  artist:  ['"{artist}" label', '"{artist}" record label', '"{artist}" management',
+            '"{artist}" manager', '"{artist}" distributor', '"{artist}" released by',
+            '"{artist}" signed to']
+  company: ['"{company}" artists', '"{company}" roster', '"{company}" releases',
+            '"{company}" management', '"{company}" founder', '"{company}" CEO',
+            '"{company}" official site']
+  activity: ['"{company}" new signing', '"{company}" new artist', '"{company}" new release',
+             '"{company}" distribution deal', '"{company}" music partnership',
+             '"{company}" hiring marketing']
+  person:  ['"{company}" "{title}"', '"{person}" "{company}" LinkedIn',
+            '"{person}" "{company}" Instagram', '"{person}" music Instagram']

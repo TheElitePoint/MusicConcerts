@@ -1,0 +1,96 @@
+# ============================================================================
+# API BUDGET PROTECTION
+# Governing rule: never burn a paid call on information obtainable for free.
+# Every paid call is recorded in the `api_calls` ledger BEFORE dispatch and
+# checked against these caps. Cap reached -> item becomes REVIEW, never a
+# crash and never a guess (SS55).
+# ============================================================================
+
+providers:
+
+  # ---- FREE / KEYLESS - no budget, only politeness rate limits -------------
+  musicbrainz:  {cost_per_call: 0.0, rate_limit_rps: 1.0,  per_run: null, per_month: null, cache_ttl_days: 30}
+  wikidata:     {cost_per_call: 0.0, rate_limit_rps: 0.5,  per_run: null, per_month: null, cache_ttl_days: 30}
+  deezer:       {cost_per_call: 0.0, rate_limit_rps: 5.0,  per_run: null, per_month: null, cache_ttl_days: 3}
+  itunes:       {cost_per_call: 0.0, rate_limit_rps: 3.0,  per_run: null, per_month: null, cache_ttl_days: 3}
+  bandcamp:     {cost_per_call: 0.0, rate_limit_rps: 0.5,  per_run: null, per_month: null, cache_ttl_days: 14}
+  website:      {cost_per_call: 0.0, rate_limit_rps: 0.5,  per_run: null, per_month: null, cache_ttl_days: 7}
+  websearch:    {cost_per_call: 0.0, rate_limit_rps: 0.2,  per_run: 400,  per_month: null, cache_ttl_days: 14}
+
+  # ---- FREE WITH KEY - quota'd by the provider, still effectively free -----
+  spotify:      {cost_per_call: 0.0, rate_limit_rps: 3.0,  per_run: 1000, per_month: null, cache_ttl_days: 1}
+  discogs:      {cost_per_call: 0.0, rate_limit_rps: 1.0,  per_run: 500,  per_month: null, cache_ttl_days: 14}
+
+  # ---- METERED - hard caps, circuit breakers ------------------------------
+  # Tavily: OPPORTUNISTIC SECOND LAYER ONLY. Trips permanently on first 402/429.
+  # A Tavily-less run MUST produce the same PASS set for anything free sources resolve.
+  tavily:
+    cost_per_call: 0.0
+    rate_limit_rps: 1.0
+    per_run: 50
+    per_month: 900
+    cache_ttl_days: 30
+    optional: true                  # pipeline never blocks or fails on this provider
+    trip_on_status: [401, 402, 429, 432, 433]
+    trip_scope: run                 # once tripped, skipped for the remainder of the run
+    trip_after_consecutive_failures: 3   # also trips on repeated timeouts (status 0),
+                                          # not just explicit quota/auth error codes
+
+  # Groq: classifier + adjudicator + narrative. NEVER a researcher.
+  groq:
+    # Models verified available on this account (2026-08). `fast` handles
+    # enum-constrained classification; `strong` only rewrites rationales.
+    models:
+      fast: openai/gpt-oss-20b
+      strong: openai/gpt-oss-120b
+    cost_per_call: 0.0002
+    rate_limit_rps: 2.0
+    per_run: 600
+    per_month: 15000
+    cache_ttl_days: 30
+    trip_after_consecutive_failures: 5
+
+  # Apify: PEOPLE / PROFILE RESOLUTION ONLY. Hard-gated in code.
+  apify:
+    # Verified FREE-tier rates (2026-08):
+    #   harvestapi/linkedin-profile-search        $0.10 per search page (<=25 people)
+    #   harvestapi/linkedin-profile-search-by-name $0.004 page / $0.002 profile
+    #   apify/instagram-profile-scraper            $0.0026 per profile
+    # One people-search page per company is the dominant cost, so the cap is
+    # expressed in those units.
+    # Per-actor real pricing (FREE tier). A single flat estimate was 30x too high
+    # for the cheap actors and made the ledger's monthly guard fire long before any
+    # real limit was near.
+    cost_per_call: 0.005            # default for unlisted endpoints
+    cost_by_actor:
+      "neuralverge/neuralverge-linkedin-company-employee": 0.155   # 0.03 start + 25 x 0.005
+      "harvestapi/linkedin-profile-search": 0.10                   # per search page
+      "harvestapi/linkedin-profile-scraper": 0.04                  # 10 items x 0.004
+      "apify/instagram-profile-scraper": 0.0026                    # per profile
+      "automation-lab/linkedin-company-employees-scraper": 0.003   # per profile, no-login SERP
+    rate_limit_rps: 0.5
+    per_run: 200          # safety net only
+    # Safety net, not the operative limit. The REAL constraints are Apify's own
+    # per-actor allowances (detected live from run logs) and each account's monthly
+    # dollar cap, both of which are checked before every call. A tight call-count
+    # cap here silently disabled Instagram verification for hours.
+    per_month: 20000
+    cache_ttl_days: 90              # profiles change slowly - cache hard
+    trip_after_consecutive_failures: 3
+    # Enforced as assertions in src/mp/sources/apify.py. A violation RAISES.
+    preconditions:
+      - company_passed_all_gates
+      - person_has_verified_name
+      - person_title_in_role_family
+      - no_cached_profile
+      - free_sources_exhausted
+
+# ---- Behaviour when a cap is hit ------------------------------------------
+on_cap_reached: review     # review | skip  (never: guess)
+
+# ---- HTTP cache ------------------------------------------------------------
+cache:
+  dir: data/cache/http
+  key: "sha256(method + url + sorted_body)"
+  # Negative results are cached too, but briefly - a 404 today may be a 200 next week.
+  negative_ttl_days: 2

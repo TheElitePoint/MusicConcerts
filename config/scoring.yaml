@@ -1,0 +1,162 @@
+# ============================================================================
+# SS39-SS46 FINAL QUALIFICATION SCORING - 100 POINTS
+# A(30) + B(25) + C(25) + D(10) + E(10) = 100
+# Section E is scored SEPARATELY per channel (SS44) -> two channel totals.
+# "Scoring must reflect actual evidence. Do not inflate scores simply to pass records."
+# Each band lists a `when` condition evaluated by src/mp/sop/scoring.py against
+# structured facts only - never against prose.
+# ============================================================================
+sop_version: "1.0"
+
+thresholds:            # SS45
+  final_pass:       90   # 90-100 -> FINAL PASS
+  research_further: 85   # 85-89  -> RESEARCH FURTHER (not final)
+  # below 85 -> NOT FINAL
+
+sections:
+
+  # ---- SS40 Section A - Company Fit - 30 points ----------------------------
+  A1_company_type:      # 10 pts
+    max: 10
+    bands:
+      - {points: 10,  when: "type_exact",        desc: "Exact fit: active label, management company, boutique/independent distributor, or closely aligned artist/label-services business"}
+      - {points: 8,   when: "type_relevant",     desc: "Relevant but structure requires some interpretation"}
+      - {points: 4,   when: "type_weak",         desc: "Weak or unclear fit"}
+    hard_note: "Hard-excluded categories cannot receive FINAL PASS regardless of score (SS40)."
+
+  A2_roster_fit:        # 10 pts - SS5 bands
+    max: 10
+    bands:
+      - {points: 10,  when: "roster_between(3,20)",    desc: "Approximately 3-20 active artists"}
+      - {points: 8,   when: "roster_between(21,25)",   desc: "Approximately 21-25 with otherwise strong fit"}
+      - {points: 6,   when: "roster_between(26,30)",   desc: "Approximately 26-30 but still relatively focused"}
+      - {points: 2,   when: "roster_other",            desc: "Very large, unclear, inactive, or poorly matched"}
+    note: "A slightly larger roster is not an automatic rejection (SS5, SS58)."
+
+  A3_multi_artist:      # 10 pts
+    max: 10
+    bands:
+      - {points: 10,  when: "artists_evidenced >= 5", desc: "Clear evidence of several artists managed/released/distributed/serviced simultaneously"}
+      - {points: 8,   when: "artists_evidenced >= 3", desc: "Strong evidence but less depth"}
+      - {points: 5,   when: "artists_evidenced >= 2", desc: "Some multi-artist relevance"}
+      - {points: 1,   when: "always",                 desc: "Mostly one artist or unclear company-level activity"}
+
+  # ---- SS41 Section B - Current Activity and Intent - 25 points ------------
+  B1_fresh_activity:    # 10 pts
+    max: 10
+    bands:
+      - {points: 10,  when: "signals_within_days(90) >= 3", desc: "Strong current activity: several recent releases, new signings, active campaigns, roster expansion"}
+      - {points: 7,   when: "signals_within_days(180) >= 2", desc: "Good recent activity"}
+      - {points: 4,   when: "signals_within_days(365) >= 1", desc: "Activity exists but weaker or older"}
+      - {points: 1,   when: "always",                        desc: "Little evidence of current activity"}
+
+  B2_signal_strength:   # 10 pts - counts DISTINCT SS27 categories, not raw signals
+    max: 10
+    bands:
+      - {points: 10,  when: "distinct_signal_categories >= 3", desc: "Multiple relevant signals (e.g. recent releases + active campaigns + new signing)"}
+      - {points: 7,   when: "distinct_signal_categories == 2",  desc: "Two strong signals"}
+      - {points: 4,   when: "distinct_signal_categories == 1",  desc: "One moderate signal"}
+      - {points: 1,   when: "always",                           desc: "Very weak timing evidence"}
+
+  B3_cross_source:      # 5 pts
+    max: 5
+    bands:
+      - {points: 5,   when: "credible_activity_sources >= 2", desc: "Activity confirmed by at least two credible sources"}
+      - {points: 3,   when: "credible_activity_sources == 1", desc: "Good evidence but limited cross-checking"}
+      - {points: 1,   when: "weak_activity_sources >= 1",     desc: "Only one weak source"}
+      - {points: 0,   when: "always",                         desc: "Unverified"}
+
+  # ---- SS42 Section C - Person Fit - 25 points -----------------------------
+  C1_functional_relevance:  # 10 pts - driven by SS30 role-family relevance
+    max: 10
+    bands:
+      - {points: 10,  when: "role_relevance >= 10", desc: "Directly relevant function (Head of Digital, Marketing Director, Label Ops Director, Head of A&R, Head of Artist Services, Founder of a small management company)"}
+      - {points: 8,   when: "role_relevance >= 8",  desc: "Strong adjacent function"}
+      - {points: 4,   when: "role_relevance >= 5",  desc: "Possible relevance"}
+      - {points: 1,   when: "always",               desc: "Weak or unrelated"}
+
+  C2_seniority:         # 8 pts - driven by SS30 seniority tiers
+    max: 8
+    bands:
+      - {points: 8,   when: "seniority == executive",  desc: "Clearly senior, able to influence company-wide decisions"}
+      - {points: 7,   when: "seniority == senior",     desc: "Clearly senior function head"}
+      - {points: 6,   when: "seniority == mid_senior", desc: "Strong mid-senior role"}
+      - {points: 3,   when: "seniority == limited",    desc: "Some influence but limited"}
+      - {points: 1,   when: "always",                  desc: "Junior or weak authority"}
+
+  C3_current_role:      # 7 pts
+    max: 7
+    bands:
+      - {points: 7,   when: "employment_sources >= 2", desc: "Current company and title independently verified"}
+      - {points: 5,   when: "employment_sources == 1", desc: "Strong evidence but one detail less certain"}
+      - {points: 3,   when: "employment_claimed",      desc: "Some uncertainty"}
+      - {points: 0,   when: "always",                  desc: "Current employment unclear"}
+    hard_note: "SS42: a record with materially uncertain current employment cannot receive FINAL PASS.
+                Enforced as hard gate `current_role_verified`, not by points alone."
+
+  # ---- SS43 Section D - Evidence Quality - 10 points -----------------------
+  D1_company_evidence:  # 5 pts
+    max: 5
+    bands:
+      - {points: 5,   when: "company_evidence_strength >= 3", desc: "Company type, identity and roster supported by strong sources"}
+      - {points: 4,   when: "company_evidence_strength == 2", desc: "Good but not perfect evidence"}
+      - {points: 2,   when: "company_evidence_strength == 1", desc: "Limited evidence"}
+      - {points: 0,   when: "always",                         desc: "Unverified"}
+
+  D2_activity_evidence: # 5 pts
+    max: 5
+    bands:
+      - {points: 5,   when: "activity_evidence_strength >= 3", desc: "Specific current activity supported by clear URL(s)"}
+      - {points: 4,   when: "activity_evidence_strength == 2", desc: "Good supporting evidence"}
+      - {points: 2,   when: "activity_evidence_strength == 1", desc: "Weak evidence"}
+      - {points: 0,   when: "always",                          desc: "No evidence"}
+
+# ---- SS44 Section E - Channel Readiness - 10 points (per channel) ----------
+channel_readiness:
+  linkedin:
+    E1_correct_profile:
+      max: 5
+      bands:
+        - {points: 5, when: "linkedin_verified",  desc: "Correct person and current company confirmed"}
+        - {points: 0, when: "always",             desc: "Profile missing or uncertain"}
+    E2_usability:
+      max: 5
+      bands:
+        - {points: 5, when: "linkedin_usability == full",    desc: "Clearly professional, current and usable"}
+        - {points: 4, when: "linkedin_usability == partial", desc: "Valid but less complete/current"}
+        - {points: 2, when: "linkedin_usability == weak",    desc: "Weak profile"}
+        - {points: 0, when: "always",                        desc: "Incorrect/unusable"}
+    hard_gate: linkedin_verified
+    hard_note: "A LinkedIn Final record requires a verified personal LinkedIn URL regardless of total score."
+  instagram:
+    E1_correct_profile:
+      max: 5
+      bands:
+        - {points: 5, when: "instagram_verified", desc: "Correct person identity and company relationship verified"}
+        - {points: 0, when: "always",             desc: "Missing, guessed or uncertain"}
+    E2_usability:
+      max: 5
+      bands:
+        - {points: 5, when: "instagram_usability == full",    desc: "Clearly usable for professional outreach, identity well supported"}
+        - {points: 4, when: "instagram_usability == partial", desc: "Usable but less professional/active"}
+        - {points: 2, when: "instagram_usability == weak",    desc: "Weak fit"}
+        - {points: 0, when: "always",                         desc: "Incorrect or unusable"}
+    hard_gate: instagram_verified
+    hard_note: "An Instagram Final record requires a verified personal Instagram profile regardless of total score."
+
+# ---- SS46 Hard Gates - a numeric score CANNOT override a failed hard gate ---
+hard_gates:
+  - approved_country
+  - correct_company_category
+  - no_hard_company_exclusion
+  - not_excluded_core_brand
+  - multi_artist_relevance
+  - credible_roster_evidence
+  - meaningful_current_activity
+  - relevant_named_person
+  - current_company_verified
+  - current_title_verified
+  - supporting_evidence_urls
+  - no_unresolved_duplicate
+  - channel_profile_verified     # channel-specific (SS44)
+  - score_at_least_90

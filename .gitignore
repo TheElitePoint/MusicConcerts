@@ -1,0 +1,46 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+keys.txt
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# Node and local artifact tooling
+node_modules/
+tmp/
+
+# Databases and runtime sidecars
+data/master.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite-journal
+
+# Generated caches and run output
+data/
+outputs/
+runs/
+new data/
+
+# Operating-system and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+credentials.json
+token.json
+data/logs/
